@@ -1,4 +1,4 @@
-Análisis comparativo de estrategias de reducción y ejecución simple en entrenamiento multisalida con TensorFlow
+# Análisis comparativo de estrategias de reducción y ejecución simple en entrenamiento multisalida con TensorFlow
 Introducción
 
 El entrenamiento distribuido en TensorFlow mediante MirroredStrategy permite aprovechar múltiples GPUs sincronizando gradientes de forma eficiente. Sin embargo, también es importante contrastar estas estrategias con ejecuciones más simples:
