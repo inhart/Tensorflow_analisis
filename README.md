@@ -28,44 +28,47 @@ Configuración experimental
     Framework: TensorFlow 2.x con Keras API.
 
 Resultados
-
-    Estrategia / Scope	Compilación (s)	Entrenamiento (s)	MAE	    MSE	    R²
-    NcclAllReduce	        12.1	    218.7	            0.1183	0.0591	0.5435
-    ReductionToOneDevice	12.2	    221.1	            0.1196	0.0605	0.636
-    Sin estrategia – GPU	8.6	        228.5	            0.1201	0.0622	0.8491
-    Sin estrategia – CPU	9.2	        713.3	            0.1215	0.0650	0.6076
-    Análisis de rendimiento
+Estrategia / Scope	Compilación (s)	Entrenamiento (s)	MAE	MSE	R²
+NcclAllReduce	12.1	218.7	0.1183	0.0591	0.5435
+ReductionToOneDevice	12.2	221.1	0.1196	0.0605	0.6360
+Sin estrategia – GPU	8.6	228.5	0.1201	0.0622	0.8491
+Sin estrategia – CPU	9.2	713.3	0.1215	0.0650	0.6076
+Análisis de rendimiento
 
 Compilación:
 
-        Las ejecuciones sin estrategia compilan más rápido (hasta un 30% menos), especialmente en GPU (8.6s), al evitar la inicialización y sincronización del entorno distribuido.
+    Las ejecuciones sin estrategia compilan más rápido (hasta un 30% menos), especialmente en GPU (8.6s), al evitar la inicialización y sincronización del entorno distribuido.
 
 Entrenamiento:
 
-        NcclAllReduce es el más rápido en entrenamiento efectivo.
+    NcclAllReduce es el más rápido en entrenamiento efectivo.
 
-        Sin estrategia en GPU tarda ~10s más, y en CPU es más de 3 veces más lento.
+    Sin estrategia en GPU tarda ~10s más, y en CPU es más de 3 veces más lento.
 
-        Esto demuestra el coste elevado del entrenamiento puro en CPU y la eficiencia del paralelismo distribuido.
+    Esto demuestra el coste elevado del entrenamiento puro en CPU y la eficiencia del paralelismo distribuido.
 
 Análisis de precisión
 
-    MAE y MSE:
+MAE y MSE:
 
-        Las estrategias distribuidas (NcclAllReduce, ReductionToOneDevice) consiguen menores errores, aunque la diferencia no es abismal.
+    Las diferencias entre estrategias son pequeñas, pero las variantes distribuidas (NcclAllReduce, ReductionToOneDevice) obtienen ligeramente mejores errores absolutos.
 
-        Sin estrategia (CPU o GPU) muestra una ligera pérdida de precisión acumulativa.
+Coeficiente de determinación (R²):
 
-    Coeficiente de determinación (R²):
+    El valor más alto lo consigue la ejecución sin estrategia en GPU (0.8491), indicando un ajuste más preciso en ese entorno.
 
-        NcclAllReduce mantiene el mejor ajuste (0.8825), con una pérdida gradual conforme bajamos en complejidad del entorno (hasta 0.8724 en CPU).
+    Le sigue ReductionToOneDevice (0.636), que supera a NcclAllReduce (0.5435), que obtiene el peor ajuste a pesar de entrenar más rápido.
+
+    La ejecución en CPU (0.6076) también supera a NcclAllReduce, aunque es notablemente más lenta.
 
 Conclusión
 
-    NcclAllReduce ofrece la mejor relación coste-beneficio: más rápido y más preciso.
+    A pesar de su rendimiento en tiempo, NcclAllReduce no logra el mejor ajuste: presenta el peor R² del conjunto, lo que sugiere posibles problemas de convergencia o sincronización agresiva.
 
-    Entrenar sin estrategia en GPU puede ser aceptable en entornos de desarrollo o cuando se dispone de una sola GPU, pero pierde en eficiencia.
+    Entrenar sin estrategia en GPU consigue el mejor resultado en R², aunque a costa de un entrenamiento algo más lento (~10 s más).
 
-    Entrenar en CPU no es recomendable: es lento, menos preciso y energéticamente costoso.
+    ReductionToOneDevice ofrece un equilibrio razonable, con buen tiempo y precisión decente.
 
-    En producción o en tareas de alto volumen, las estrategias distribuidas son muy superiores, especialmente con múltiples GPUs disponibles.
+    El entrenamiento en CPU sigue siendo desaconsejable por su lentitud, aunque su ajuste es mejor que el de NcclAllReduce.
+
+Recomendación: en contextos donde la precisión del modelo es prioritaria frente al tiempo, evitar NcclAllReduce. Para desarrollo o producción con una sola GPU, la ejecución directa en GPU puede ser la más efectiva. Para entornos distribuidos, se recomienda probar otras configuraciones o ajustar hiperparámetros si se usa NcclAllReduce.
