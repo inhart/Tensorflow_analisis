@@ -4,7 +4,7 @@
 
 #### **0. Objetivo**
 
-Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, comparando cinco modos de ejecución en TensorFlow:
+Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, comparando cinco modos de ejecución en TensorFlow
 
 1. **Sin estrategia – GPU0**
 2. **`MirroredStrategy` default**
