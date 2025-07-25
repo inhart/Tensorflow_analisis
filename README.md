@@ -27,13 +27,13 @@ Configuración experimental
 
     Framework: TensorFlow 2.x con Keras API.
 
-Resultados
-Estrategia / Scope	Compilación (s)	Entrenamiento (s)	MAE	MSE	R²
-NcclAllReduce	12.1	218.7	0.1183	0.0591	0.8825
-ReductionToOneDevice	12.2	221.1	0.1196	0.0605	0.8802
-Sin estrategia – GPU	8.6	228.5	0.1201	0.0622	0.8781
-Sin estrategia – CPU	9.2	713.3	0.1215	0.0650	0.8724
-Análisis de rendimiento
+    Resultados
+    Estrategia / Scope	Compilación (s)	Entrenamiento (s)	MAE	MSE	R²
+    NcclAllReduce	12.1	218.7	0.1183	0.0591	0.8825
+    ReductionToOneDevice	12.2	221.1	0.1196	0.0605	0.8802
+    Sin estrategia – GPU	8.6	228.5	0.1201	0.0622	0.8781
+    Sin estrategia – CPU	9.2	713.3	0.1215	0.0650	0.8724
+    Análisis de rendimiento
 
     Compilación:
 
