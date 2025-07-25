@@ -55,7 +55,8 @@ Análisis de precisión
 
 Errores (MAE, MSE):
 
-    Sin estrategia en GPU logra el mejor rendimiento por amplio margen: MAE de 1.9881 y MSE de 39.125, valores muy por debajo de los obtenidos con estrategias distribuidas.
+    Sin estrategia en GPU logra el mejor rendimiento por amplio margen: MAE de 1.9881 y MSE de 39.125, 
+    valores muy por debajo de los obtenidos con estrategias distribuidas.
 
     Las variantes distribuidas tienen errores altos, especialmente NcclAllReduce, con un MAE de 3.8356 y MSE de 132.98.
 
@@ -79,6 +80,7 @@ Conclusión
 
 Recomendación: 
 
-    Para este tipo de modelos multisalida, si solo se dispone de una GPU, entrenar sin estrategia de distribución 
+    Para este tipo de modelos multisalida, si solo se dispone de una GPU, 
+    entrenar sin estrategia de distribución 
     proporciona los mejores resultados. Si se usan estrategias distribuidas, se recomienda      
     validar cuidadosamente las métricas, ya que el paralelismo no siempre implica mejor ajuste.
