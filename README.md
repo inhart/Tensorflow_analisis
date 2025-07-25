@@ -78,4 +78,6 @@ Conclusión
 
 Recomendación: 
 
-    Para este tipo de modelos multisalida, si solo se dispone de una GPU, entrenar sin estrategia de distribución proporciona los mejores resultados. Si se usan estrategias distribuidas, se recomienda      validar cuidadosamente las métricas, ya que el paralelismo no siempre implica mejor ajuste.
+    Para este tipo de modelos multisalida, si solo se dispone de una GPU, entrenar sin estrategia de distribución 
+    proporciona los mejores resultados. Si se usan estrategias distribuidas, se recomienda      
+    validar cuidadosamente las métricas, ya que el paralelismo no siempre implica mejor ajuste.
