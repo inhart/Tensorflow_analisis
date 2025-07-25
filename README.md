@@ -20,7 +20,6 @@ Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, compar
 * **Hardware**: 1 GPU NVIDIA y CPU single‑thread.
 * **TensorFlow**: v2.10.0, CUDA 12.9.
 
----
 
 #### **Resumen de resultados**
 
@@ -32,7 +31,7 @@ Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, compar
 | **Mirrored + ReductionToOneDev** | 0.12            | 54.55             | 3.4485 | 109.7412 | 0.63827 |
 | **Sin estrategia – CPU0**        | 9.20            | 713.30            | 3.4917 | 99.4479  | 0.60761 |
 
----
+
 
 #### **Análisis de tiempos**
 
@@ -71,7 +70,6 @@ Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, compar
 
   * **R² = 0.6076**, MAE 3.4917, MSE 99.45, similar a NcclAllReduce, pero a un coste de tiempo de entrenamiento muy elevado.
 
----
 
 #### **Conclusiones**
 
@@ -83,7 +81,6 @@ Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, compar
    * `ReductionToOneDevice` ofrece el entrenamiento más rápido entre distribuidos.
 4. **Ejecutar en CPU** es impráctico salvo como línea base: muy lento y con precisión moderada.
 
----
 
 #### **Recomendación**:
 Para escenarios de producción con una sola GPU, entrena **sin estrategia distribuida**. Al escalar a múltiples GPUs, prioriza **NcclAllReduce** o **ReductionToOneDevice** y ajusta hiperparámetros para mejorar convergencia.
