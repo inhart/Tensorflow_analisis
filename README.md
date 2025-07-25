@@ -12,7 +12,6 @@ Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, compar
 4. **`MirroredStrategy` + `ReductionToOneDevice`**
 5. **Sin estrategia – CPU0**
 
----
 
 #### **Configuración experimental**
 
