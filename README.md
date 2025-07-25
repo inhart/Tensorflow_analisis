@@ -77,4 +77,6 @@ Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, compar
 4. **Ejecutar en CPU** es impráctico salvo como línea base: muy lento y con precisión moderada.
 
 #### **Recomendación**
- Para escenarios de producción con una sola GPU, entrena **sin estrategia distribuida**. Al escalar a múltiples GPUs, prioriza **NcclAllReduce** o **ReductionToOneDevice** y ajusta hiperparámetros para mejorar convergencia.
+    
+   Para escenarios de producción con una sola GPU, entrena **sin estrategia distribuida**. 
+   Al escalar a múltiples GPUs, prioriza **NcclAllReduce** o **ReductionToOneDevice** y ajusta hiperparámetros para mejorar convergencia.
