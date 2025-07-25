@@ -1,5 +1,5 @@
 # Análisis comparativo de estrategias de reducción y ejecución simple en entrenamiento multisalida con TensorFlow
-Introducción
+### Introducción
 
 El entrenamiento distribuido en TensorFlow mediante MirroredStrategy permite aprovechar múltiples GPUs sincronizando gradientes de forma eficiente. Sin embargo, también es importante contrastar estas estrategias con ejecuciones más simples:
 
@@ -27,7 +27,7 @@ Configuración experimental
 
     Framework: TensorFlow 2.x con API de Keras.
 
-Resultados
+### Resultados
 
     Estrategia / Scope	Compilación (s)	Entrenamiento (s)	    MAE	    MSE	    R²
     NcclAllReduce	        12.1    	        218.7	        3.8356	132.98	0.5435
@@ -37,13 +37,13 @@ Resultados
 
 ## Análisis de rendimiento
 
-Compilación:
+### Compilación:
 
     Las ejecuciones sin estrategia compilan más rápido al no inicializar el entorno distribuido. En GPU sin estrategia se alcanza el menor tiempo de compilación (8.6 s).
 
     Las estrategias distribuidas (MirroredStrategy) añaden ~3.5 s de sobrecarga.
 
-Entrenamiento:
+### Entrenamiento:
 
     NcclAllReduce es el más rápido (218.7 s), seguido muy de cerca por ReductionToOneDevice.
 
@@ -51,16 +51,16 @@ Entrenamiento:
 
     El entrenamiento en CPU sin estrategia es claramente inviable para producción: más de 700 s.
 
-Análisis de precisión
+## Análisis de precisión
 
-Errores (MAE, MSE):
+### Errores (MAE, MSE):
 
     Sin estrategia en GPU logra el mejor rendimiento por amplio margen: MAE de 1.9881 y MSE de 39.125, 
     valores muy por debajo de los obtenidos con estrategias distribuidas.
 
     Las variantes distribuidas tienen errores altos, especialmente NcclAllReduce, con un MAE de 3.8356 y MSE de 132.98.
 
-Coeficiente de determinación (R²):
+### Coeficiente de determinación (R²):
 
     Sin estrategia – GPU obtiene el mejor ajuste del modelo (R² = 0.8491).
 
@@ -68,7 +68,7 @@ Coeficiente de determinación (R²):
 
     NcclAllReduce, pese a ser el más rápido, obtiene el peor R² (0.5435), indicando un ajuste muy pobre.
 
-Conclusión
+## Conclusión
 
     Entrenar sin estrategia en una única GPU es la mejor opción en este caso: mejor ajuste, menor error y tiempos de entrenamiento razonables.
 
@@ -78,7 +78,7 @@ Conclusión
 
     Entrenar en CPU no es recomendable: lento y con rendimiento mediocre.
 
-Recomendación: 
+## Recomendación: 
 
     Para este tipo de modelos multisalida, si solo se dispone de una GPU, 
     entrenar sin estrategia de distribución 
