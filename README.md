@@ -34,7 +34,8 @@ Resultados
     ReductionToOneDevice	12.2	    221.1	            3.5008	100.17	0.6360
     Sin estrategia – GPU	8.6	        228.5	            1.9881	39.125	0.8491
     Sin estrategia – CPU	9.2	        713.3	            3.4916	99.44	0.6076
-    Análisis de rendimiento
+
+## Análisis de rendimiento
 
 Compilación:
 
