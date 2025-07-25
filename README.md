@@ -1,13 +1,13 @@
 # Análisis comparativo de estrategias de reducción y ejecución simple en entrenamiento multisalida con TensorFlow
-### Introducción
+## Introducción
 
-El entrenamiento distribuido en TensorFlow mediante MirroredStrategy permite aprovechar múltiples GPUs sincronizando gradientes de forma eficiente. Sin embargo, también es importante contrastar estas estrategias con ejecuciones más simples:
+### El entrenamiento distribuido en TensorFlow mediante MirroredStrategy permite aprovechar múltiples GPUs sincronizando gradientes de forma eficiente. Sin embargo, también es importante contrastar estas estrategias con ejecuciones más simples:
 
     Ejecución en scope CPU: como línea base sin paralelismo ni aceleración por GPU.
 
     Ejecución en scope GPU (sin estrategia): uso de una única GPU sin distribución.
 
-Este estudio compara los siguientes enfoques:
+### Este estudio compara los siguientes enfoques:
 
     NcclAllReduce
 
@@ -17,15 +17,37 @@ Este estudio compara los siguientes enfoques:
 
     Sin estrategia – Scope CPU
 
-Configuración experimental
+### Configuración experimental
 
     Modelo: Red neuronal multisalida para regresión.
 
     Datos: Misma partición de entrenamiento y validación.
 
-    Hardware: Dos GPUs idénticas para las estrategias distribuidas.
+    Hardware:  GeForce GTX 960 y como replica 2048MB de RAM
 
-    Framework: TensorFlow 2.x con API de Keras.
+    Nvidia Cuda Toolkit:
+    +-----------------------------------------------------------------------------------------+
+    | NVIDIA-SMI 576.88                 Driver Version: 576.88         CUDA Version: 12.9     |
+    |-----------------------------------------+------------------------+----------------------+
+    | GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+    | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+    |                                         |                        |               MIG M. |
+    |=========================================+========================+======================|
+    |   0  NVIDIA GeForce GTX 960       WDDM  |   00000000:01:00.0 Off |                  N/A |
+    | 24%   41C    P8             19W /  160W |    1561MiB /   2048MiB |      0%      Default |
+    |                                         |                        |                  N/A |
+    +-----------------------------------------+------------------------+----------------------+
+                                                                                             
+    +-----------------------------------------------------------------------------------------+
+    | Processes:                                                                              |
+    |  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+    |        ID   ID                                                               Usage      |
+    |=========================================================================================|
+    |    0   N/A  N/A            8048    C+G   ...har\.conda\envs\ts\python.exe      N/A      |
+    |    0   N/A  N/A           25384    C+G   ...har\.conda\envs\ts\python.exe      N/A      |
+    +-----------------------------------------------------------------------------------------+
+    
+    Framework: TensorFlow 2.10 con API de Keras.
 
 ### Resultados
 
