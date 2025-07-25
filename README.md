@@ -1,6 +1,6 @@
 ---
 
-### **Análisis comparativo de estrategias de compilación y ejecución en entrenamiento multisalida con TensorFlow (incluyendo CPU:0)**
+### **Análisis comparativo de estrategias de compilación y ejecución en entrenamiento multisalida con TensorFlow**
 
 #### **0. Objetivo**
 
