@@ -1,108 +1,59 @@
-# Análisis comparativo de estrategias de reducción y ejecución simple en entrenamiento multisalida con TensorFlow
-## Introducción
+### **Análisis comparativo de estrategias de compilación y ejecución en entrenamiento multisalida con TensorFlow**
 
-### El entrenamiento distribuido en TensorFlow mediante MirroredStrategy permite aprovechar múltiples GPUs sincronizando gradientes de forma eficiente. Sin embargo, también es importante contrastar estas estrategias con ejecuciones más simples:
+#### **0. Objetivo**
 
-    Ejecución en scope CPU: como línea base sin paralelismo ni aceleración por GPU.
+Evaluar un mismo modelo de regresión multisalida sobre idénticos datos, comparando cuatro modos de ejecución en TensorFlow:
 
-    Ejecución en scope GPU (sin estrategia): uso de una única GPU sin distribución.
+1. **Sin estrategia – GPU0**
+2. **`MirroredStrategy` con GPUs lógicas (default)**
+3. **`MirroredStrategy` + `NcclAllReduce`**
+4. **`MirroredStrategy` + `ReductionToOneDevice`**
 
-### Este estudio compara los siguientes enfoques:
+#### **Configuración experimental**
 
-    NcclAllReduce
+* **Modelo**: Red secuencial Keras con capas BatchNorm, LeakyReLU, densas y Dropout.
+* **Datos**: 671 muestras, 800 entradas y 8 salidas; normalizadas con `StandardScaler`.
+* **Hardware**: 1 GPU NVIDIA (detected) y CPU como fallback.
+* **TensorFlow**: v2.10.0, CUDA 12.9.
 
-    ReductionToOneDevice
+#### **Resumen de resultados**
 
-    Sin estrategia – Scope GPU
+| Modo                             | Compilación (s) | Entrenamiento (s) | MAE    | MSE      | R²      |
+| -------------------------------- | --------------- | ----------------- | ------ | -------- | ------- |
+| **GPU0 (tf.device GPU)**         | 0.31            | 85.84             | 1.9882 | 39.1258  | 0.84914 |
+| **MirroredStrategy (default)**   | 0.14            | 59.23             | 3.8356 | 132.9852 | 0.54358 |
+| **Mirrored + NcclAllReduce**     | 0.14            | 71.77             | 3.5008 | 100.1732 | 0.63644 |
+| **Mirrored + ReductionToOneDev** | 0.12            | 54.55             | 3.4485 | 109.7412 | 0.63827 |
 
-    Sin estrategia – Scope CPU
+#### **Análisis de tiempos**
 
-### Configuración experimental
+* **Compilación**:
 
-    Modelo: Red neuronal multisalida para regresión.
+  * La inicialización de cualquier `MirroredStrategy` añade \~0.17 s de sobrecarga frente a la ejecución directa en GPU.
+  * Entre las tres estrategias de espejo, las diferencias son mínimas (<0.02 s).
 
-    Datos: Misma partición de entrenamiento y validación.
+* **Entrenamiento**:
 
-    Hardware:  GeForce GTX 960 y como replica 2048MB de RAM
+  * **Más rápido**: `ReductionToOneDevice` (54.55 s) y `MirroredStrategy` default (59.23 s).
+  * **Intermedio**: `NcclAllReduce` (71.77 s).
+  * **Más lento**: ejecución directa en GPU0 (85.84 s), al no aprovechar paralelismo en los kernels de distribución.
 
-    Nvidia Cuda Toolkit:
-    +-----------------------------------------------------------------------------------------+
-    | NVIDIA-SMI 576.88                 Driver Version: 576.88         CUDA Version: 12.9     |
-    |-----------------------------------------+------------------------+----------------------+
-    | GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-    | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-    |                                         |                        |               MIG M. |
-    |=========================================+========================+======================|
-    |   0  NVIDIA GeForce GTX 960       WDDM  |   00000000:01:00.0 Off |                  N/A |
-    | 24%   41C    P8             19W /  160W |    1561MiB /   2048MiB |      0%      Default |
-    |                                         |                        |                  N/A |
-    +-----------------------------------------+------------------------+----------------------+
-                                                                                             
-    +-----------------------------------------------------------------------------------------+
-    | Processes:                                                                              |
-    |  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-    |        ID   ID                                                               Usage      |
-    |=========================================================================================|
-    |    0   N/A  N/A            8048    C+G   ...har\.conda\envs\ts\python.exe      N/A      |
-    |    0   N/A  N/A           25384    C+G   ...har\.conda\envs\ts\python.exe      N/A      |
-    +-----------------------------------------------------------------------------------------+
-    
-    Framework: TensorFlow 2.10 con API de Keras.
+#### **Análisis de precisión**
 
-### Resultados
+* **Sin estrategia – GPU0** ofrece el **mejor ajuste**:
 
-    Estrategia / Scope	Compilación (s)	Entrenamiento (s)	    MAE	    MSE	    R²
-    NcclAllReduce	        12.1    	        218.7	        3.8356	132.98	0.5435
-    ReductionToOneDevice	12.2	                221.1           3.5008	100.17	0.6360
-    Sin estrategia – GPU	8.6	                228.5	        1.9881	39.125	0.8491
-    Sin estrategia – CPU	9.2	                713.3	        3.4916	99.44	0.6076
+  * **R² = 0.8491**, MAE y MSE muy bajos, reflejando una buena adaptación a los datos.
+* **Estrategias distribuidas**:
 
-## Análisis de rendimiento
+  * **Default Mirrored**: su peor R² (0.5436) y errores muy altos (MAE 3.8356, MSE 132.99) indican posible inestabilidad por la reducción implícita en CPU.
+  * **NcclAllReduce** mejora notablemente R² a 0.6364 y reduce errores (MAE 3.5008, MSE 100.17), gracias al uso de NCCL para sincronización rápida.
+  * **ReductionToOneDevice** consigue el **mejor compromiso** entre tiempo y precisión dentro de las estrategias distribuidas (R² 0.6383).
 
-### Compilación:
+#### **Conclusiones**
 
-    Las ejecuciones sin estrategia compilan más rápido al no inicializar el entorno distribuido. En GPU sin estrategia se alcanza el menor tiempo de compilación (8.6 s).
+1. **Ejecución directa en GPU** (sin `MirroredStrategy`) resulta la **mejor opción** cuando se dispone de una sola GPU, maximizando precisión a costa de un entrenamiento algo más lento.
+2. **`MirroredStrategy` default** no es recomendable: rápido, pero sacrifica gran parte de la calidad del modelo.
+3. **`NcclAllReduce`** recupera parte de la precisión perdida y puede escalar bien a múltiples GPUs, aunque no tan veloz como otras variantes.
+4. **`ReductionToOneDevice`** ofrece el tiempo de entrenamiento más bajo y precisión aceptable entre las opciones distribuidas.
 
-    Las estrategias distribuidas (MirroredStrategy) añaden ~3.5 s de sobrecarga.
-
-### Entrenamiento:
-
-    NcclAllReduce es el más rápido (218.7 s), seguido muy de cerca por ReductionToOneDevice.
-
-    El modo sin estrategia en GPU es unos 10 s más lento, pero aún competitivo.
-
-    El entrenamiento en CPU sin estrategia es claramente inviable para producción: más de 700 s.
-
-## Análisis de precisión
-
-### Errores (MAE, MSE):
-
-    Sin estrategia en GPU logra el mejor rendimiento por amplio margen: MAE de 1.9881 y MSE de 39.125, 
-    valores muy por debajo de los obtenidos con estrategias distribuidas.
-
-    Las variantes distribuidas tienen errores altos, especialmente NcclAllReduce, con un MAE de 3.8356 y MSE de 132.98.
-
-### Coeficiente de determinación (R²):
-
-    Sin estrategia – GPU obtiene el mejor ajuste del modelo (R² = 0.8491).
-
-    ReductionToOneDevice y el modo CPU logran resultados aceptables (0.6360 y 0.6076).
-
-    NcclAllReduce, pese a ser el más rápido, obtiene el peor R² (0.5435), indicando un ajuste muy pobre.
-
-## Conclusión
-
-    Entrenar sin estrategia en una única GPU es la mejor opción en este caso: mejor ajuste, menor error y tiempos de entrenamiento razonables.
-
-    ReductionToOneDevice es aceptable, pero no destaca ni en precisión ni en velocidad.
-
-    NcclAllReduce, pese a ser el más rápido, degrada severamente la calidad del modelo, siendo inapropiado si la precisión es crítica.
-
-    Entrenar en CPU no es recomendable: lento y con rendimiento mediocre.
-
-## Recomendación: 
-
-    Para este tipo de modelos multisalida, si solo se dispone de una GPU, 
-    entrenar sin estrategia de distribución 
-    proporciona los mejores resultados. Si se usan estrategias distribuidas, se recomienda      
-    validar cuidadosamente las métricas, ya que el paralelismo no siempre implica mejor ajuste.
+> **Recomendación**: Para un entorno monógrafo de GPU única, entrena **sin** `MirroredStrategy`. Si escalas a varias GPUs, emplea **NcclAllReduce** o **ReductionToOneDevice**, calibrando hiperparámetros para mejorar el ajuste.
