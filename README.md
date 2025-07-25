@@ -73,4 +73,6 @@ Conclusión
 
     El entrenamiento en CPU sigue siendo desaconsejable por su lentitud, aunque su ajuste es mejor que el de NcclAllReduce.
 
-Recomendación: en contextos donde la precisión del modelo es prioritaria frente al tiempo, evitar NcclAllReduce. Para desarrollo o producción con una sola GPU, la ejecución directa en GPU puede ser la más efectiva. Para entornos distribuidos, se recomienda probar otras configuraciones o ajustar hiperparámetros si se usa NcclAllReduce.
+Recomendación: 
+
+    en contextos donde la precisión del modelo es prioritaria frente al tiempo, evitar NcclAllReduce. Para desarrollo o producción con una sola GPU, la ejecución directa en GPU puede ser la más             efectiva. Para entornos distribuidos, se recomienda probar otras configuraciones o ajustar hiperparámetros si se usa NcclAllReduce.
